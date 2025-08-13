@@ -81,8 +81,7 @@ document.getElementById('leadForm').addEventListener('submit', function(e) {
     const formData = new FormData(this);
     const leadData = {
         nombre: formData.get('nombre'),
-        email: formData.get('email'),
-        telefono: formData.get('telefono'),
+        email: formData.get('email'),        
         empresa: formData.get('empresa'),
         sector: formData.get('sector'),
         presupuesto: formData.get('presupuesto'),
@@ -363,13 +362,8 @@ function validateForm() {
     if (!isValidEmail(email)) {
         showFieldError('email', 'Ingresa un email válido');
         isValid = false;
-    }
-    
-    if (telefono.length < 10) {
-        showFieldError('telefono', 'Ingresa un teléfono válido (mínimo 10 dígitos)');
-        isValid = false;
-    }
-    
+    }    
+       
     return isValid;
 }
 
@@ -454,4 +448,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 2000);
         });
     }
+});
+
+// WhatsApp Float Button Tracking
+document.querySelector('.whatsapp-float').addEventListener('click', function() {
+    trackCTAClick('whatsapp_float_click', 'floating_button');
 });
