@@ -118,6 +118,11 @@ body {
 
 .nav-link:hover {
     color: var(--yellow); /* Hover amarillo */
+    transition: color 0.3s ease;
+  background-color: transparent;
+  font-size: 22px;
+  border-radius: 4px;
+  transform: scale(1.05);
 }
 
 .nav-link:hover::after {
@@ -219,7 +224,7 @@ body {
 
 /* Hero Section */
 .hero {
-    background-image: linear-gradient(#0a3330f5, #072422e3, #000000ea), url('../images/hero.jpg');
+    background-image: linear-gradient(#0a3330f5, #072422e3, #000000ea), url('../images/favicon.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -242,7 +247,8 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2426&q=80');
+    background-image: url('../images/favicon.png');
+   /* background-image: url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2426&q=80'); */
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
