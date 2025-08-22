@@ -70,12 +70,13 @@ document.querySelectorAll('.feature-card, .step-card, .bonus-card, .sector-item,
 
 // Lead Form Handling con Formspree
 document.getElementById('leadForm').addEventListener('submit', function(e) {
-    // Validar formulario antes del envío
+    // Solo prevenir si la validación falla
     if (!validateForm()) {
         e.preventDefault();
         return;
     }
     
+    // Permitir que el formulario se envíe normalmente
     const submitButton = this.querySelector('.form-submit');
     const originalText = submitButton.innerHTML;
     
@@ -98,12 +99,7 @@ document.getElementById('leadForm').addEventListener('submit', function(e) {
     // Track form submission
     trackFormSubmission('hero_lead_form', leadData);
     
-    // El formulario se enviará automáticamente por Formspree
-    // Solo restauramos el botón después de un tiempo
-    setTimeout(() => {
-        submitButton.innerHTML = originalText;
-        submitButton.disabled = false;
-    }, 3000);
+    // NO usar e.preventDefault() aquí - dejar que Formspree maneje el envío
 });
 
 function showFormSuccess() {
