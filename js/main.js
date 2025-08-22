@@ -68,20 +68,26 @@ document.querySelectorAll('.feature-card, .step-card, .bonus-card, .sector-item,
     observer.observe(el);
 });
 
-// Lead Form Handling
+// Lead Form Handling con Formspree
 document.getElementById('leadForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form before submission
+    // Validar formulario antes del envío
     if (!validateForm()) {
+        e.preventDefault();
         return;
     }
     
-    // Get form data
+    const submitButton = this.querySelector('.form-submit');
+    const originalText = submitButton.innerHTML;
+    
+    // Cambiar estado del botón
+    submitButton.innerHTML = '📤 Enviando...';
+    submitButton.disabled = true;
+    
+    // Preparar datos para tracking
     const formData = new FormData(this);
     const leadData = {
         nombre: formData.get('nombre'),
-        email: formData.get('email'),        
+        email: formData.get('email'),
         empresa: formData.get('empresa'),
         sector: formData.get('sector'),
         presupuesto: formData.get('presupuesto'),
@@ -92,11 +98,12 @@ document.getElementById('leadForm').addEventListener('submit', function(e) {
     // Track form submission
     trackFormSubmission('hero_lead_form', leadData);
     
-    // Show success message
-    showFormSuccess();
-    
-    // Reset form
-    this.reset();
+    // El formulario se enviará automáticamente por Formspree
+    // Solo restauramos el botón después de un tiempo
+    setTimeout(() => {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+    }, 3000);
 });
 
 function showFormSuccess() {
