@@ -328,7 +328,7 @@ function showFieldError(fieldId, message) {
         field.style.boxShadow = 'none';
     }, 5000);
 }
-// Lead Form Handling - AJAX Version CORREGIDO
+// Lead Form Handling - Siguiendo patrón oficial de Formspree
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('leadForm');
     const modal = document.getElementById('successModal');
@@ -371,22 +371,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Manejo del formulario
+    // Manejo del formulario siguiendo patrón oficial de Formspree
     if (form) {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+        async function handleSubmit(event) {
+            event.preventDefault();
             
+            // Validar formulario
             if (!validateForm()) {
                 return;
             }
             
-            const submitButton = this.querySelector('.form-submit');
+            const submitButton = form.querySelector('.form-submit');
             const originalText = submitButton.innerHTML;
             
             submitButton.innerHTML = '📤 Enviando...';
             submitButton.disabled = true;
             
-            const formData = new FormData(this);
+            // Preparar datos para tracking
+            const formData = new FormData(event.target);
             const leadData = {
                 nombre: formData.get('nombre'),
                 email: formData.get('email'),
@@ -397,31 +399,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 source: 'website_hero_form'
             };
             
-            try {
-                const response = await fetch('https://formspree.io/f/mdkdqwpn', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
+            // USAR EL PATRÓN EXACTO DE FORMSPREE
+            fetch(event.target.action, {
+                method: form.method,
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(response => {
                 if (response.ok) {
+                    // Éxito
                     trackFormSubmission('hero_lead_form', leadData);
                     showSuccessModal();
                     form.reset();
                 } else {
-                    throw new Error('Error en el envío');
+                    // Error de respuesta
+                    response.json().then(data => {
+                        if (Object.hasOwn(data, 'errors')) {
+                            alert('Error: ' + data["errors"].map(error => error["message"]).join(", "));
+                        } else {
+                            alert("Oops! Hubo un problema al enviar el formulario");
+                        }
+                    });
                 }
-                
-            } catch (error) {
-                alert('Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.');
+            }).catch(error => {
+                // Error de red
+                alert("Oops! Hubo un problema al enviar el formulario");
                 console.error('Error:', error);
-            } finally {
+            }).finally(() => {
+                // Restaurar botón
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
-            }
-        });
+            });
+        }
+        
+        form.addEventListener("submit", handleSubmit);
     }
     
     // Animaciones de los campos del formulario

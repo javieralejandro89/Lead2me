@@ -128,7 +128,7 @@
     <h3 class="form-title">🚀 Consultoría Gratuita</h3>
     <p class="form-subtitle">Descubre cómo potenciar tu negocio con Google Ads</p>
     
-    <form id="leadForm" class="lead-capture-form" method="POST">
+    <form id="leadForm" class="lead-capture-form" action="https://formspree.io/f/mdkdqwpn" method="POST">
         <div class="form-group">
             <label for="nombre">Nombre *</label>
             <input type="text" id="nombre" name="nombre" required>
@@ -171,10 +171,11 @@
         </div>
         
         <!-- Campos ocultos para configurar Formspree -->
-        <input type="hidden" name="_subject" value="Nueva Consultoría Solicitada - Lead2me">
-        <input type="hidden" name="_next" value="https://www.lead2me.net#gracias">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="source" value="website_hero_form">
+        <input type="hidden" name="_subject" value="Nueva Consultoría - Lead2me">
+    <input type="hidden" name="_next" value="https://www.lead2me.net">
+    <input type="hidden" name="_captcha" value="true"> <!-- Cambiar a true -->
+    <input type="hidden" name="_replyto" value="email"> <!-- Para respuestas -->
+    <input type="hidden" name="source" value="website_hero_form">
         
         <button type="submit" class="form-submit">
             Solicitar Consultoría Gratuita
@@ -187,22 +188,7 @@
     </form>
 
     
-<div id="successModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>¡Formulario Enviado Exitosamente!</h3>
-            <button class="modal-close" id="closeModal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="success-icon">✅</div>
-            <p>Gracias por tu interés. Nos pondremos en contacto contigo en las próximas 24 horas para programar tu consultoría gratuita.</p>
-            <div class="modal-actions">
-                <a href="tel:6679404929" class="btn-primary">📞 Llamar Ahora</a>
-                <a href="https://wa.me/526679404929" target="_blank" class="btn-secondary">💬 WhatsApp</a>
-            </div>
-        </div>
-    </div>
-</div>
+
 </div>
         </div>
     </section>    
@@ -551,6 +537,23 @@
         }
     }
     </script>
+
+    <div id="successModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>¡Formulario Enviado Exitosamente!</h3>
+            <button class="modal-close" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="success-icon">✅</div>
+            <p>Gracias por tu interés. Nos pondremos en contacto contigo en las próximas 24 horas para programar tu consultoría gratuita.</p>
+            <div class="modal-actions">
+                <a href="tel:6679404929" class="btn-primary">📞 Llamar Ahora</a>
+                <a href="https://wa.me/526679404929" target="_blank" class="btn-secondary">💬 WhatsApp</a>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script src="js/main.js"></script>
 </body>
