@@ -328,13 +328,12 @@ function showFieldError(fieldId, message) {
         field.style.boxShadow = 'none';
     }, 5000);
 }
-// Lead Form Handling - Siguiendo patrón oficial de Formspree
+// Lead Form Handling - FormSubmit Version
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('leadForm');
     const modal = document.getElementById('successModal');
     const closeModal = document.getElementById('closeModal');
     
-    // Función para mostrar modal
     function showSuccessModal() {
         if (modal) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -344,14 +343,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Función para cerrar modal
     function hideModal() {
         if (modal) {
             modal.classList.remove('show');
         }
     }
     
-    // Event listeners para cerrar modal
     if (closeModal) {
         closeModal.addEventListener('click', hideModal);
     }
@@ -364,19 +361,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Cerrar modal con tecla Escape
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal && modal.classList.contains('show')) {
             hideModal();
         }
     });
     
-    // Manejo del formulario siguiendo patrón oficial de Formspree
     if (form) {
         async function handleSubmit(event) {
             event.preventDefault();
             
-            // Validar formulario
             if (!validateForm()) {
                 return;
             }
@@ -387,7 +381,6 @@ document.addEventListener('DOMContentLoaded', function() {
             submitButton.innerHTML = '📤 Enviando...';
             submitButton.disabled = true;
             
-            // Preparar datos para tracking
             const formData = new FormData(event.target);
             const leadData = {
                 nombre: formData.get('nombre'),
@@ -399,44 +392,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 source: 'website_hero_form'
             };
             
-            // USAR EL PATRÓN EXACTO DE FORMSPREE
-            fetch(event.target.action, {
-                method: form.method,
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            }).then(response => {
+            try {
+                const response = await fetch(event.target.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                
                 if (response.ok) {
-                    // Éxito
                     trackFormSubmission('hero_lead_form', leadData);
                     showSuccessModal();
                     form.reset();
                 } else {
-                    // Error de respuesta
-                    response.json().then(data => {
-                        if (Object.hasOwn(data, 'errors')) {
-                            alert('Error: ' + data["errors"].map(error => error["message"]).join(", "));
-                        } else {
-                            alert("Oops! Hubo un problema al enviar el formulario");
-                        }
-                    });
+                    throw new Error('Error en el envío');
                 }
-            }).catch(error => {
-                // Error de red
-                alert("Oops! Hubo un problema al enviar el formulario");
+                
+            } catch (error) {
+                alert("Hubo un problema al enviar el formulario. Por favor, inténtalo de nuevo.");
                 console.error('Error:', error);
-            }).finally(() => {
-                // Restaurar botón
+            } finally {
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
-            });
+            }
         }
         
         form.addEventListener("submit", handleSubmit);
     }
     
-    // Animaciones de los campos del formulario
     const formFields = document.querySelectorAll('#leadForm input, #leadForm select');
     
     formFields.forEach(field => {
