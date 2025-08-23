@@ -68,98 +68,6 @@ document.querySelectorAll('.feature-card, .step-card, .bonus-card, .sector-item,
     observer.observe(el);
 });
 
-// Lead Form Handling con Formspree
-document.getElementById('leadForm').addEventListener('submit', function(e) {
-    // Solo prevenir si la validación falla
-    if (!validateForm()) {
-        e.preventDefault();
-        return;
-    }
-    
-    // Permitir que el formulario se envíe normalmente
-    const submitButton = this.querySelector('.form-submit');
-    const originalText = submitButton.innerHTML;
-    
-    // Cambiar estado del botón
-    submitButton.innerHTML = '📤 Enviando...';
-    submitButton.disabled = true;
-    
-    // Preparar datos para tracking
-    const formData = new FormData(this);
-    const leadData = {
-        nombre: formData.get('nombre'),
-        email: formData.get('email'),
-        empresa: formData.get('empresa'),
-        sector: formData.get('sector'),
-        presupuesto: formData.get('presupuesto'),
-        timestamp: new Date().toISOString(),
-        source: 'website_hero_form'
-    };
-    
-    // Track form submission
-    trackFormSubmission('hero_lead_form', leadData);
-    
-    // NO usar e.preventDefault() aquí - dejar que Formspree maneje el envío
-});
-
-function showFormSuccess() {
-    const form = document.getElementById('leadForm');
-    const originalHTML = form.innerHTML;
-    
-    form.innerHTML = `
-        <div style="text-align: center; padding: 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
-            <h3 style="color: var(--white); margin-bottom: 1rem; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">¡Gracias por tu interés!</h3>
-            <p style="color: rgba(255,255,255,0.9); margin-bottom: 1.5rem; line-height: 1.5;">
-                Hemos recibido tu solicitud. Nos pondremos en contacto contigo en las próximas 24 horas para programar tu consultoría gratuita.
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="tel:6679404929" style="background: var(--gradient-accent); color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 25px; font-weight: 600; box-shadow: 0 4px 15px rgba(227, 71, 73, 0.3);">
-                    📞 Llamar Ahora
-                </a>
-                <a href="https://wa.me/526679404929" target="_blank" style="background: #25D366; color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 25px; font-weight: 600; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
-                    💬 WhatsApp
-                </a>
-            </div>
-        </div>
-    `;
-    
-    // Restore form after 10 seconds
-    setTimeout(() => {
-        form.innerHTML = originalHTML;
-        addFormEventListener();
-    }, 10000);
-}
-
-function addFormEventListener() {
-    const newForm = document.getElementById('leadForm');
-    if (newForm) {
-        newForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (!validateForm()) {
-                return;
-            }
-            
-            const formData = new FormData(this);
-            const leadData = {
-                nombre: formData.get('nombre'),
-                email: formData.get('email'),
-                telefono: formData.get('telefono'),
-                empresa: formData.get('empresa'),
-                sector: formData.get('sector'),
-                presupuesto: formData.get('presupuesto'),
-                timestamp: new Date().toISOString(),
-                source: 'website_hero_form'
-            };
-            
-            trackFormSubmission('hero_lead_form', leadData);
-            showFormSuccess();
-            this.reset();
-        });
-    }
-}
-
 // CTA Button Tracking (Google Tag Manager Events)
 function trackCTAClick(action, label) {
     if (typeof gtag !== 'undefined') {
@@ -346,11 +254,10 @@ script.type = 'application/ld+json';
 script.text = JSON.stringify(structuredData);
 document.head.appendChild(script);
 
-// Form validation enhancements
+// Form validation enhancements - CORREGIDO
 function validateForm() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = document.getElementById('email').value.trim();
-    const telefono = document.getElementById('telefono').value.trim();
     
     // Clear previous errors
     clearFieldErrors();
@@ -421,10 +328,103 @@ function showFieldError(fieldId, message) {
         field.style.boxShadow = 'none';
     }, 5000);
 }
-
-// Smooth form animations
+// Lead Form Handling - AJAX Version CORREGIDO
 document.addEventListener('DOMContentLoaded', function() {
-    // Add focus animations to form fields
+    const form = document.getElementById('leadForm');
+    const modal = document.getElementById('successModal');
+    const closeModal = document.getElementById('closeModal');
+    
+    // Función para mostrar modal
+    function showSuccessModal() {
+        if (modal) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 300);
+        }
+    }
+    
+    // Función para cerrar modal
+    function hideModal() {
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+    
+    // Event listeners para cerrar modal
+    if (closeModal) {
+        closeModal.addEventListener('click', hideModal);
+    }
+    
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+    }
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && modal.classList.contains('show')) {
+            hideModal();
+        }
+    });
+    
+    // Manejo del formulario
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            const submitButton = this.querySelector('.form-submit');
+            const originalText = submitButton.innerHTML;
+            
+            submitButton.innerHTML = '📤 Enviando...';
+            submitButton.disabled = true;
+            
+            const formData = new FormData(this);
+            const leadData = {
+                nombre: formData.get('nombre'),
+                email: formData.get('email'),
+                empresa: formData.get('empresa'),
+                sector: formData.get('sector'),
+                presupuesto: formData.get('presupuesto'),
+                timestamp: new Date().toISOString(),
+                source: 'website_hero_form'
+            };
+            
+            try {
+                const response = await fetch('https://formspree.io/f/mdkdqwpn', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    trackFormSubmission('hero_lead_form', leadData);
+                    showSuccessModal();
+                    form.reset();
+                } else {
+                    throw new Error('Error en el envío');
+                }
+                
+            } catch (error) {
+                alert('Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.');
+                console.error('Error:', error);
+            } finally {
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
+        });
+    }
+    
+    // Animaciones de los campos del formulario
     const formFields = document.querySelectorAll('#leadForm input, #leadForm select');
     
     formFields.forEach(field => {
@@ -437,23 +437,14 @@ document.addEventListener('DOMContentLoaded', function() {
             this.parentNode.style.transform = 'scale(1)';
         });
     });
-    
-    // Add loading state to submit button
-    const submitButton = document.querySelector('.form-submit');
-    if (submitButton) {
-        submitButton.addEventListener('click', function() {
-            this.innerHTML = '🔄 Enviando...';
-            this.disabled = true;
-            
-            setTimeout(() => {
-                this.innerHTML = 'Solicitar Consultoría Gratuita';
-                this.disabled = false;
-            }, 2000);
-        });
-    }
 });
 
 // WhatsApp Float Button Tracking
-document.querySelector('.whatsapp-float').addEventListener('click', function() {
-    trackCTAClick('whatsapp_float_click', 'floating_button');
+document.addEventListener('DOMContentLoaded', function() {
+    const whatsappFloat = document.querySelector('.whatsapp-float');
+    if (whatsappFloat) {
+        whatsappFloat.addEventListener('click', function() {
+            trackCTAClick('whatsapp_float_click', 'floating_button');
+        });
+    }
 });
