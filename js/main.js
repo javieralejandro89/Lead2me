@@ -104,9 +104,9 @@ function trackFormSubmission(formName, leadData) {
             'event_category': 'Form',
             'event_label': formName,
             'custom_parameters': {
-                'sector': leadData.sector,
                 'presupuesto': leadData.presupuesto,
-                'has_empresa': leadData.empresa ? 'yes' : 'no'
+                'has_empresa': leadData.empresa ? 'yes' : 'no',
+                'has_telefono': leadData.telefono ? 'yes' : 'no'
             }
         });
     }
@@ -254,29 +254,7 @@ script.type = 'application/ld+json';
 script.text = JSON.stringify(structuredData);
 document.head.appendChild(script);
 
-// Form validation enhancements - CORREGIDO
-function validateForm() {
-    const nombre = document.getElementById('nombre').value.trim();
-    const email = document.getElementById('email').value.trim();
-    
-    // Clear previous errors
-    clearFieldErrors();
-    
-    let isValid = true;
-    
-    if (nombre.length < 2) {
-        showFieldError('nombre', 'El nombre debe tener al menos 2 caracteres');
-        isValid = false;
-    }
-    
-    if (!isValidEmail(email)) {
-        showFieldError('email', 'Ingresa un email válido');
-        isValid = false;
-    }    
-       
-    return isValid;
-}
-
+// Form validation functions
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -328,12 +306,118 @@ function showFieldError(fieldId, message) {
         field.style.boxShadow = 'none';
     }, 5000);
 }
-// Lead Form Handling - FormSubmit Version
+
+// Phone validation with intl-tel-input
+let iti; // Variable global para el teléfono
+
+// Función de validación del teléfono
+function validatePhoneField() {
+    const phoneInput = document.getElementById('telefono');
+    if (iti && phoneInput.value.trim() !== '' && !iti.isValidNumber()) {
+        showFieldError('telefono', 'Ingresa un número de teléfono válido');
+        return false;
+    }
+    return true;
+}
+
+// Form validation principal
+function validateForm() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = document.getElementById('email').value.trim();
+    
+    // Clear previous errors
+    clearFieldErrors();
+    
+    let isValid = true;
+    
+    if (nombre.length < 2) {
+        showFieldError('nombre', 'El nombre debe tener al menos 2 caracteres');
+        isValid = false;
+    }
+    
+    if (!isValidEmail(email)) {
+        showFieldError('email', 'Ingresa un email válido');
+        isValid = false;
+    }
+    
+    // Validate phone with intl-tel-input
+    if (!validatePhoneField()) {
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+// Main DOMContentLoaded function
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('leadForm');
     const modal = document.getElementById('successModal');
     const closeModal = document.getElementById('closeModal');
+    const phoneInput = document.getElementById('telefono');
+    const phoneHint = document.getElementById('phone-hint');
     
+    // Initialize intl-tel-input
+    // Initialize intl-tel-input - CONFIGURACIÓN CORREGIDA
+if (phoneInput && window.intlTelInput) {
+    iti = window.intlTelInput(phoneInput, {
+        initialCountry: "mx",
+        preferredCountries: ["mx", "us", "ca", "es", "ar", "co", "pe", "cl"],
+        utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.13/build/js/utils.js",
+        autoHideDialCode: false,
+        nationalMode: false,
+        formatOnDisplay: true,
+        separateDialCode: false, // AGREGADO: Evitar separación del código
+        showFlags: true, // AGREGADO: Asegurar que se muestren las banderas
+        dropdownContainer: document.body, // AGREGADO: Prevenir problemas de z-index
+        customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+            return "Ej: " + selectedCountryPlaceholder;
+        }
+    });
+    
+    // AGREGADO: Evento para debugging
+    phoneInput.addEventListener('open:countrydropdown', function() {
+        console.log('Dropdown abierto');
+    });
+    
+    phoneInput.addEventListener('close:countrydropdown', function() {
+        console.log('Dropdown cerrado');
+    });
+    
+    // Real-time phone validation
+    phoneInput.addEventListener('input', function() {
+        if (iti.isValidNumber()) {
+            if (phoneHint) {
+                phoneHint.style.display = 'block';
+                phoneHint.textContent = '✓ Número válido';
+                phoneHint.style.color = '#4ade80';
+            }
+            phoneInput.style.borderColor = '#4ade80';
+        } else if (phoneInput.value.trim() === '') {
+            if (phoneHint) {
+                phoneHint.style.display = 'none';
+            }
+            phoneInput.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        } else {
+            if (phoneHint) {
+                phoneHint.style.display = 'block';
+                phoneHint.textContent = 'Número inválido';
+                phoneHint.style.color = '#f87171';
+            }
+            phoneInput.style.borderColor = '#f87171';
+        }
+    });
+    
+    // Reset styles on country change
+    phoneInput.addEventListener('countrychange', function() {
+        phoneInput.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        if (phoneHint) {
+            phoneHint.style.display = 'none';
+        }
+        console.log('País cambiado a:', iti.getSelectedCountryData());
+    });
+}
+    
+    // Modal functions
     function showSuccessModal() {
         if (modal) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -349,6 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Modal event listeners
     if (closeModal) {
         closeModal.addEventListener('click', hideModal);
     }
@@ -367,6 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Form submission handling
     if (form) {
         async function handleSubmit(event) {
             event.preventDefault();
@@ -381,12 +467,17 @@ document.addEventListener('DOMContentLoaded', function() {
             submitButton.innerHTML = '📤 Enviando...';
             submitButton.disabled = true;
             
+            // Update phone input with international format before sending
+            if (iti && iti.isValidNumber()) {
+                phoneInput.value = iti.getNumber();
+            }
+            
             const formData = new FormData(event.target);
             const leadData = {
                 nombre: formData.get('nombre'),
                 email: formData.get('email'),
+                telefono: iti ? iti.getNumber() : formData.get('telefono'),
                 empresa: formData.get('empresa'),
-                sector: formData.get('sector'),
                 presupuesto: formData.get('presupuesto'),
                 timestamp: new Date().toISOString(),
                 source: 'website_hero_form'
@@ -402,6 +493,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     trackFormSubmission('hero_lead_form', leadData);
                     showSuccessModal();
                     form.reset();
+                    
+                    // Reset intl-tel-input
+                    if (iti) {
+                        iti.setCountry('mx');
+                    }
+                    if (phoneHint) {
+                        phoneHint.style.display = 'none';
+                    }
                 } else {
                     throw new Error('Error en el envío');
                 }
@@ -418,6 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener("submit", handleSubmit);
     }
     
+    // Form field animations
     const formFields = document.querySelectorAll('#leadForm input, #leadForm select');
     
     formFields.forEach(field => {
