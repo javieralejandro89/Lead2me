@@ -70,7 +70,7 @@ body {
 }
 
 .logo-img {
-    width: 160px;
+    width: 200px;
     height: 60px;    
     object-fit: cover;
     filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.116)); /* Sombra blanca inicial */
@@ -1986,3 +1986,4 @@ html {
         padding: 10px 12px !important;
     }
 }
+
